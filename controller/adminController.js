@@ -37,3 +37,23 @@ exports.deleteRestaurant = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
+// Delete a review
+exports.deleteReview = async (req, res) => {
+    try {
+        await reviewModel.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true, message: 'Review deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// Cancel a reservation
+exports.cancelReservation = async (req, res) => {
+    try {
+        await reservationModel.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true, message: 'Reservation cancelled successfully' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};

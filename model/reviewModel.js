@@ -3,12 +3,12 @@ const { default: mongoose } = require("mongoose");
 const reviewSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users',
+        ref: 'user',
         required: [true, 'Review must be linked to a user']
     },
     restaurant: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Restaurants',
+        ref: 'restaurant',
         required: [true, 'Review must be linked to a restaurant']
     },
     rating: {
@@ -43,5 +43,5 @@ reviewSchema.pre('save', function(next) {
     next();
 });
 
-const reviewModel = mongoose.model('Review', reviewSchema , 'Reviews');
+const reviewModel = mongoose.model('review', reviewSchema , 'Reviews');
 module.exports = reviewModel;

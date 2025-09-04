@@ -43,7 +43,7 @@ const restaurantController = {
             } = req.query;
 
             const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 10;
+            const limit = parseInt(req.query.limit) || 1000; 
             const skip = (page - 1) * limit;
 
             let filter = {};
@@ -54,7 +54,6 @@ const restaurantController = {
 
             // Extra filters
             if (dietaryRestrictions) filter.dietaryRestrictions = { $in: dietaryRestrictions.split(',') };
-            // if (ambiance) filter.ambiance = { $regex: ambiance, $options: 'i' };
             if (features) filter.features = { $in: features.split(',') };
 
             if (search) {
@@ -92,15 +91,28 @@ const restaurantController = {
             res.status(500).json({ message : 'server error on getRestaurantById controller' , error: error.message });
         }
     },
+    getMyRestaurants : async (req, res) => {
+        try {
+            const restaurants = await restaurantModel.find({ owner: req.user._id });
+
+            res.status(200).json({
+                success: true,
+                count: restaurants.length,
+                data: restaurants
+            });
+        } catch (error) {
+            console.error("getMyRestaurants error:", error.message); // 👀 Debug log
+            res.status(500).json({
+                message: "Server error on getMyRestaurants controller",
+                error: error.message
+            });
+        }
+    },
     updateRestaurant : async (req , res) => {
         try {
             let restaurant = await restaurantModel.findById(req.params.id);
             if (!restaurant) {
                 return res.status(404).json({ message: 'Restaurant not found' });
-            }
-
-            if (restaurant.manager.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-                return res.status(403).json({ message: 'Not authorized to update this restaurant' });
             }
 
             restaurant = await restaurantModel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
@@ -116,40 +128,42 @@ const restaurantController = {
                 return res.status(404).json({ message: 'Restaurant not found' });
             }
 
-            if (restaurant.manager.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-                return res.status(403).json({ message: 'Not authorized to delete this restaurant' });
-            }
-
             await restaurant.deleteOne();
             res.status(200).json({ message: 'Restaurant deleted successfully' });
         } catch (error) {
             res.status(500).json({ message : 'server error on delete Restaurant controller' , error: error.message });
         }
     },
-    // Upload new photos
-    uploadPhotos  : async (req, res) => {
+    
+    uploadPhotos: async (req, res) => {
         try {
             const restaurant = await restaurantModel.findById(req.params.id);
 
             if (!restaurant) {
-                return res.status(404).json({ message: 'Restaurant not found' });
+            return res.status(404).json({ message: "Restaurant not found" });
             }
 
-            if (restaurant.manager.toString() !== req.user._id.toString()) {
-                return res.status(403).json({ message: 'Not authorized' });
+            if (!req.user) {
+            return res.status(401).json({ message: "User not authenticated" });
             }
 
-            const photoUrls = req.files.map(file => `/uploads/${file.filename}`);
+            if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: "No photos uploaded" });
+            }
+
+            const photoUrls = req.files.map((file) => `/uploads/${file.filename}`);
             restaurant.photos.push(...photoUrls);
 
             await restaurant.save();
-            res.json({ message: 'Photos uploaded successfully', photos: restaurant.photos });
-
+            res.json({ message: "Photos uploaded successfully", photos: restaurant.photos });
         } catch (error) {
-            res.status(500).json({ message : 'server error on upload photos controller' , error: error.message });
+            console.error("Upload photos error:", error);
+            res.status(500).json({
+            message: "Server error on upload photos controller",
+            error: error.message,
+            });
         }
     },
-
     deletePhoto  :  async (req, res) => {
         try {
             const restaurant = await restaurantModel.findById(req.params.id);

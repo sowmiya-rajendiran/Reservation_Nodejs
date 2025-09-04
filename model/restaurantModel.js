@@ -3,7 +3,7 @@ const { default: mongoose } = require("mongoose");
 const restaurantSchema = new mongoose.Schema({
     owner: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users',
+        ref: 'user',
         required: [true, 'Restaurant must have an owner']
     },
     name: {
@@ -65,15 +65,15 @@ const restaurantSchema = new mongoose.Schema({
         price: { type: Number, required: true, min: 0 }
     }], 
     photos: [String],
-    dietaryRestrictions: [String], // e.g. ["vegan", "gluten-free"]
+    dietaryRestrictions: [String],
     ambiance: {
         type : String
-    }, // e.g. "romantic", "family", "casual"
+    }, 
     features: [String], 
     rating: { type: Number, default: 0, min: 0, max: 5 },
     createdAt: { type: Date, default: Date.now }
 })
 
-const restaurantModel = mongoose.model('Restaurant' , restaurantSchema , 'Restaurants');
+const restaurantModel = mongoose.model('restaurant' , restaurantSchema , 'Restaurants');
 
 module.exports = restaurantModel;

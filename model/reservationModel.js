@@ -3,12 +3,12 @@ const { default: mongoose } = require("mongoose");
 const reservationSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users',
+        ref: 'user',
         required: [true, 'Reservation must belong to a user']
     },
     restaurant: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Restaurant',
+        ref: 'restaurant',
         required: [true, 'Reservation must be for a restaurant']
     },
     date: {
@@ -55,9 +55,11 @@ const reservationSchema = new mongoose.Schema({
         enum: ['unpaid', 'paid'],
         default: 'unpaid'
     },
+    paymentIntentId: { type: String },
+    amount: { type: Number, required: true },
     createdAt: { type: Date, default: Date.now }
 })
 
-const reservationModel = mongoose.model('Reservation' , reservationSchema , 'Reservations');
+const reservationModel = mongoose.model('reservation' , reservationSchema , 'Reservations');
 
 module.exports = reservationModel;

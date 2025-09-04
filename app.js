@@ -9,7 +9,7 @@ const userRouter = require('./routes/usersRouter');
 const restRouter = require('./routes/restaurantRoutes');
 const recommendationsRouter = require('./routes/recommendationRoutes');
 const adminRouter = require('./routes/adminRouter');
-
+const path = require("path");
 const app = express();
 
 //  allow requests from frontend
@@ -18,6 +18,8 @@ app.use(cors({
   origin : "http://localhost:5173",
   credentials: true,
 }));
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(express.json());
 
@@ -33,7 +35,7 @@ app.use('/api/restaurants', restRouter);
 app.use('/api/reservations', reservationRouter);
 app.use('/api/reviews', reviewRouter);
 app.use('/api/recommendations', recommendationsRouter);
-app.use('/api/admin' , adminRouter)
+app.use('/api/admin' , adminRouter);
 
 // health check route
 app.get('/api/health' , (req , res) =>{

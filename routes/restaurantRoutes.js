@@ -1,6 +1,6 @@
 const express = require('express');
 const { protect, allowRoles } = require('../middleware/auth');
-const { createRestaurant, getRestaurants, getRestaurantById, updateRestaurant, deleteRestaurant, uploadPhotos, deletePhoto } = require('../controller/restaurantController');
+const { createRestaurant, getRestaurants, getRestaurantById, updateRestaurant, deleteRestaurant, uploadPhotos, deletePhoto, getMyRestaurants } = require('../controller/restaurantController');
 const upload = require('../middleware/upload');
 
 const restRouter = express.Router();
@@ -8,6 +8,7 @@ const restRouter = express.Router();
 restRouter.post('/' , protect, allowRoles(['manager' , 'admin']) , createRestaurant);
 restRouter.get('/' , getRestaurants);
 
+restRouter.get('/my', protect, allowRoles(['manager', 'admin']), getMyRestaurants);
 
 restRouter.route('/:id')
     .get(getRestaurantById)

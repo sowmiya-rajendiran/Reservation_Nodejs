@@ -1,6 +1,10 @@
 const { validationResult } = require("express-validator");
 const userModel = require("../model/userModel");
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { sendTokenResponse } = require("../utils/auth");
+const tokenModel = require("../model/passwordResetToken");
+const sendResetEmail = require("../utils/sendEmail");
 
 
 const authController = {
@@ -15,7 +19,7 @@ const authController = {
                 })
             }
 
-            const {name , email , password , phone} = req.body;
+            const {name , email , password , phone , role} = req.body;
 
             const existingUser = await userModel.findOne({email});
 
@@ -32,7 +36,8 @@ const authController = {
                 name,
                 email,
                 password,
-                phone
+                phone,
+                role
             })
 
             user.save();
@@ -122,6 +127,57 @@ const authController = {
             })
         }catch(error){
             res.status(500).json({message : "logout error"})
+        }
+    },
+    forgetPassword : async (req , res) => {
+        try{
+            const {email} = req.body;
+            // check exist user
+            const user = await userModel.findOne({ email });
+            if (!user) return res.status(404).json({ message: "Email Id not found in Database" });
+            
+            // generate random string token
+            const token =  crypto.randomBytes(32).toString("hex");
+
+            // Save new token in DB
+            await tokenModel.create({
+                userId: user._id,
+                token,
+                expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+            });
+            
+            await sendResetEmail(email , token);
+            return res.status(200).json({message : "Email Send Successfully" , token : token})
+
+        }
+        catch(err){
+            res.status(500).json({message : "Error forgetPassword Contoller" , Error : err.message})
+        }
+    },
+    resetPassword : async (req , res) =>{
+        try{
+            const {token} = req.params ;
+            const {password} = req.body ;
+            // find token
+            const resetToken = await tokenModel.findOne({token});
+            // check valid token 
+            if(!resetToken || resetToken.expiresAt < Date.now()){  
+                return res.status(400).json({ message: "Invalid or expired token" });
+            }
+
+            const user = await userModel.findById(resetToken.userId);
+            if(!user) return res.status(404).json({ message: "User not found" });
+
+            user.password = password;
+
+            await user.save();
+
+            await tokenModel.deleteOne({ _id: resetToken._id });
+
+            res.status(200).json({ message: "Password reset successful" });
+
+        }catch(err){
+            res.status(500).json({message : "Error reset password controller" , Error : err.message})
         }
     }
 }
