@@ -14,7 +14,7 @@ const app = express();
 
 //  allow requests from frontend
 app.use(cors({
-    origin: "https://reservationsyst.netlify.app", 
+    origin: "https://reservationsyst.netlify.app/api", 
     //   origin : "http://localhost:5173",
   credentials: true,
 }));
@@ -29,13 +29,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Routes
-app.use('/api/auth' , authRouter);
-app.use('/api/users', userRouter);
-app.use('/api/restaurants', restRouter);
-app.use('/api/reservations', reservationRouter);
-app.use('/api/reviews', reviewRouter);
-app.use('/api/recommendations', recommendationsRouter);
-app.use('/api/admin' , adminRouter);
+app.use('/auth' , authRouter);
+app.use('/users', userRouter);
+app.use('/restaurants', restRouter);
+app.use('/reservations', reservationRouter);
+app.use('/reviews', reviewRouter);
+app.use('/recommendations', recommendationsRouter);
+app.use('/admin' , adminRouter);
 
 // health check route
 app.get('/api/health' , (req , res) =>{
