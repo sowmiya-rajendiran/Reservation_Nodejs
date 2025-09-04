@@ -14,8 +14,8 @@ const app = express();
 
 //  allow requests from frontend
 app.use(cors({
-    //   origin: "https://passwordre.netlify.app",
-  origin : "http://localhost:5173",
+    origin: "https://reservationsyst.netlify.app", 
+    //   origin : "http://localhost:5173",
   credentials: true,
 }));
 

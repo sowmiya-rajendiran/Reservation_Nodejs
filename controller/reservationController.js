@@ -73,8 +73,8 @@ const reservationController = {
         mode: "payment",
         // success_url: `http://localhost:5173/userdashboard?success=true&resId=${reservation._id}`,
         // cancel_url: `http://localhost:5173/userdashboard?canceled=true&resId=${reservation._id}`,
-        success_url: `http://localhost:5173/userdashboard`,
-        cancel_url: `http://localhost:5173/userdashboard?canceled=true&resId=${reservation._id}`,
+        success_url: `https://reservationsyst.netlify.app/userdashboard`,
+        cancel_url: `https://reservationsyst.netlify.app/userdashboard?canceled=true&resId=${reservation._id}`,
         
         metadata: { reservationId: reservation._id.toString() },
       });
