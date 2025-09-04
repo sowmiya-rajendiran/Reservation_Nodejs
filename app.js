@@ -10,36 +10,22 @@ const restRouter = require('./routes/restaurantRoutes');
 const recommendationsRouter = require('./routes/recommendationRoutes');
 const adminRouter = require('./routes/adminRouter');
 const path = require("path");
-
 const app = express();
 
-// Allowed origins (local + production)
-const allowedOrigins = [
-  "https://reservationsyst.netlify.app", // production frontend
-//   "http://localhost:5173" // local frontend
-];
-
+//  allow requests from frontend
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+    origin: "https://reservationsyst.netlify.app", 
+    //   origin : "http://localhost:5173",
   credentials: true,
 }));
 
-// Handle preflight requests
-app.options("*", cors());
-
-// Serve uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Middleware
 app.use(express.json());
+
+// middleware to handle url encoded bodies
 app.use(express.urlencoded({ extended: true }));
+
 app.use(cookieParser());
 
 // Routes
@@ -51,7 +37,7 @@ app.use('/api/reviews', reviewRouter);
 app.use('/api/recommendations', recommendationsRouter);
 app.use('/api/admin' , adminRouter);
 
-// Health check
+// health check route
 app.get('/api/health' , (req , res) =>{
     res.status(200).json({
         success : true,
@@ -60,10 +46,10 @@ app.get('/api/health' , (req , res) =>{
     })
 })
 
-// Error handling
+//error handling middleware
 app.use(errorHandler);
 
-// 404 handler
+// handle 404 errors
 app.use((req, res, next) => {
     res.status(404).json({
         success: false,
