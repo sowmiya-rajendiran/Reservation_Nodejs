@@ -21,7 +21,7 @@ const sendTokenResponse = (user , statuscode , res) =>{
         expires : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         httpOnly : true,
         secure : NODE_ENV === 'production',
-        sameSite : 'strict'
+        sameSite: 'None'
     }
     // response
     res.status(statuscode).cookie("token",token,options).json({
