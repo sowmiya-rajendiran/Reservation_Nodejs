@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { SECRET_KEY, EXPIRES_IN } = require('./config');
+const { SECRET_KEY, EXPIRES_IN, NODE_ENV } = require('./config');
 
 // generate token
 const generateToken = (id) => {
@@ -18,12 +18,16 @@ const sendTokenResponse = (user , statuscode , res) =>{
 
     // set cookie options
     const options = {
-        expires : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        httpOnly : true,
+        // expires : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        // httpOnly : true,
         // secure : NODE_ENV === 'production',
         // sameSite: 'None',
-        sameSite: 'none',
-        secure: true
+        // sameSite: 'none',
+        // secure: true
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        httpOnly: true,
+        sameSite: NODE_ENV === 'production' ? 'None' : 'Lax',
+        secure: NODE_ENV === 'production',
     }
     // response
     res.status(statuscode).cookie("token",token,options).json({
