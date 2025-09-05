@@ -1,43 +1,28 @@
 const jwt = require('jsonwebtoken');
-const { SECRET_KEY, EXPIRES_IN, NODE_ENV } = require('./config');
+const { SECRET_KEY, EXPIRES_IN } = require('./config');
 
 // generate token
 const generateToken = (id) => {
     return jwt.sign(
-        {id},
+        { id },
         SECRET_KEY,
-        {expiresIn : EXPIRES_IN}
-    )
-}
+        { expiresIn: EXPIRES_IN }
+    );
+};
 
-// send token in cookies
-
-const sendTokenResponse = (user , statuscode , res) =>{
-
+// send token in JSON (not cookies)
+const sendTokenResponse = (user, statusCode, res) => {
     const token = generateToken(user._id);
 
-    // set cookie options
-    const options = {
-        // expires : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        // httpOnly : true,
-        // secure : NODE_ENV === 'production',
-        // sameSite: 'None',
-        // sameSite: 'none',
-        // secure: true
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-        sameSite: NODE_ENV === 'production' ? 'None' : 'Lax',
-        secure: NODE_ENV === 'production',
-    }
-    // response
-    res.status(statuscode).cookie("token",token,options).json({
-        success : true,
+    // response → frontend saves this in localStorage
+    res.status(statusCode).json({
+        success: true,
         token,
         user
-    })
-}
+    });
+};
 
 module.exports = {
     generateToken,
     sendTokenResponse
-}
+};

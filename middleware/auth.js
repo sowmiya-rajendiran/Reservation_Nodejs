@@ -2,22 +2,27 @@ const jwt = require('jsonwebtoken');
 const { SECRET_KEY } = require('../utils/config');
 const userModel = require('../model/userModel');
 
-const auth  = {
-    protect : async (req , res ,next) => {
-        try{
-            const token = req.cookies.token;
-            if(!token){
-                return res.status(400).json({
-                    success : false,
-                    message : 'Token not Valid',
-                    error : err.message
-                })
+const auth = {
+    protect: async (req, res, next) => {
+        try {
+            let token;
+
+            // Get token from "Authorization: Bearer <token>"
+            if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+                token = req.headers.authorization.split(" ")[1];
             }
-            
-            // verify token
+
+            if (!token) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'No token provided'
+                });
+            }
+
+            // Verify token
             const decoded = jwt.verify(token, SECRET_KEY);
 
-            // get the user from token
+            // Get user from DB
             req.user = await userModel.findById(decoded.id);
 
             if (!req.user) {
@@ -28,40 +33,36 @@ const auth  = {
             }
 
             if (!req.user.isActive) {
-                return res.status(401).json({
+                return res.status(403).json({
                     success: false,
                     message: 'User account is deactivated'
                 });
             }
 
-            req.userId = decoded.id ;
+            req.userId = decoded.id;
+            next();
 
-            next()
-
-        }catch(error){
+        } catch (error) {
             return res.status(401).json({
                 success: false,
-                message: 'Not authorized to access this route.'
-            })
+                message: 'Not authorized to access this route',
+                error: error.message
+            });
         }
-        
     },
-    allowRoles : (roles) =>{
-        return async (req , res , next ) => {
-            const userId = req.userId ;
-            // find in db
+
+    allowRoles: (roles) => {
+        return async (req, res, next) => {
+            const userId = req.userId;
             const user = await userModel.findById(userId);
-            // check roll basedd
-            if(roles.includes(user.role)){
+
+            if (user && roles.includes(user.role)) {
                 next();
+            } else {
+                res.status(403).json({ message: "Access denied" });
             }
-            else{
-                res.status(400).json({message : "Access denied"})
-            }
-
-        }
-
+        };
     }
-}
+};
 
-module.exports = auth ;
+module.exports = auth;
